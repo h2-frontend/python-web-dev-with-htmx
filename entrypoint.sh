@@ -8,4 +8,5 @@ poetry run poe db-push
 
 # Run the commands in parallel
 echo "Starting the tailwind build and the main application in the background..."
-parallel --ungroup ::: "poetry run poe dev-tailwind" "poetry run uvicorn app.app:app --host 0.0.0.0 --reload"
+#parallel --ungroup ::: "poetry run poe dev-tailwind" "poetry run uvicorn app.app:app --host 0.0.0.0 --reload"
+poetry run poe dev-tailwind

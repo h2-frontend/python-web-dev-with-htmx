@@ -1,14 +1,16 @@
-version: "3.7"
-
 services:
-  core:
+  front:
     build:
       context: .
-    command: poetry run uvicorn app.app:app --host 0.0.0.0 --reload
     entrypoint: ./entrypoint.sh
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - .:/app
-    environment:
-      - DB_HOST=db
+    env_file:
+      - ".env"
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    command:
+      #- poetry run uvicorn app.app:app --host 0.0.0.0 --reload
+      - /bin/sh -c "while sleep 1000; do :; done"
