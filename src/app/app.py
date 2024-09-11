@@ -15,10 +15,17 @@ from src.app.chat_router import chat_router
 from src.app.example_router import example_router
 from src.app.utils import templates
 
+from langchain.globals import set_debug, set_verbose
+set_debug(True)
+set_verbose(True)
+
+from src.app.rag.config import CONFIG
+from src.app.rag.chat import build_chain
+
 security = HTTPBearer()
 
-
 app = FastAPI()
+app.state.chain = build_chain(**CONFIG)
 
 app.add_middleware(
     CORSMiddleware,
