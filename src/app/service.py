@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Any
 
 import bcrypt
 import litellm
@@ -11,8 +11,15 @@ from sqlalchemy.orm import selectinload
 from src.app import schemas
 from src.app.db import AsyncSession, models
 import logging
+#logging.basicConfig(filename='./log/messages.log', level=logging.INFO)
 
-logging.basicConfig(filename='./log/messages.log', level=logging.INFO)
+from src.app.rag.config import LANGSMITH_PROJECT
+from langchain.globals import set_debug, set_verbose
+from langchain_teddynote import logging as log_langsmith
+log_langsmith.langsmith(LANGSMITH_PROJECT, set_enable=True)
+
+set_debug(True)
+set_verbose(True)
 
 @dataclass
 class AppService:
@@ -241,7 +248,7 @@ class AppService:
             self.session.add(message)
         return message
 
-    async def generate(self, chat_id: int) -> AsyncGenerator[dict, None]:
+    async def generate(self, chat_id: int, chain: Any) -> AsyncGenerator[dict, None]:
         """
         Generate a response for a chat.
 
@@ -274,34 +281,36 @@ class AppService:
             else:
                 messages.append({"role": "assistant", "content": message.content})
 
+        logging.info('\n')
+        for m in messages:
+            logging.info(f"Message: {m}")
+        logging.info('\n')
+
+        response = chain.astream(messages[-1]["content"])
         #response = await litellm.acompletion(
         #    model="gpt-3.5-turbo", messages=messages, stream=True
         #)
-
-        logging.info('\n')
-        for m in messages:
-            logging.info(f"message: {m}")
-        logging.info('\n')
-
-        #print(f'\n\nmessages:{messages}')
-
-        response = await litellm.acompletion(
-          #model="Llama-3-KoEn-8B-Instruct-preview", 
-          model="gpt-3.5-turbo", 
+        temp = '''response = await litellm.acompletion(
+          model="gpt-3.5-turbo", #"Llama-3-KoEn-8B-Instruct-preview",
           #  #messages=[{ "content": "은행에서 대출을 받으려면 어떻게 해야하죠?","role": "user"}],
           messages=messages,
           stream=True,
           base_url="http://192.168.0.24:8080", 
-          custom_llm_provider="openai")
+          custom_llm_provider="openai")'''
 
         #logging.info(f"response: {response}")
         #print(f'\nresponse:{response}')
 
         res = ""
         async for chunk in response:
-            content = chunk.choices[0].delta.content
+            #content = chunk#.choices[0].delta.content
+            print(f"\n\n{'*'*50}\ntype(chunk):{type(chunk)}\nchunk: {chunk}\n\n", flush=True)
+            content = chunk#['response']#.choices[0].delta.content
             if content:
-                res += content
+                print(f"{'#'*20} content: {content} {'#'*20}", flush=True)
+                logging.info(f"{'#'*20} content: {content} {'#'*20}", flush=True)
+                #res += content
+                res += str(content)
                 s = f"""
                 <div id="ai-sse" class="prose prose-sm w-full flex flex-col [&>*]:flex-grow">
                     {markdown(res, extensions=["fenced_code"])}
