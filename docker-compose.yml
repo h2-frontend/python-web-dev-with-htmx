@@ -4,10 +4,10 @@ services:
   core:
     build:
       context: .
-    command: poetry run uvicorn app.app:app --host 0.0.0.0 --reload
+    #command: poetry run uvicorn app.app:app --host 0.0.0.0 --reload
     entrypoint: ./entrypoint.sh
     ports:
-      - "8000:8000"
+      - "8002:8000"
     volumes:
       - .:/app
     environment:
