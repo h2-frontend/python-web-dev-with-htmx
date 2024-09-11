@@ -8,8 +8,8 @@ from markdown import markdown
 from sqlalchemy import ScalarResult, func, select
 from sqlalchemy.orm import selectinload
 
-from app import schemas
-from app.db import AsyncSession, models
+from src.app import schemas
+from src.app.db import AsyncSession, models
 
 
 @dataclass

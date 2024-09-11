@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Response
 
-from app import schemas
-from app.service import AppService
-from app.utils import get_app_service
+from src.app import schemas
+from src.app.service import AppService
+from src.app.utils import get_app_service
 
 auth_router = APIRouter()
 

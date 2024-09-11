@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.settings import settings
+from src.app.settings import settings
 
 from .models import Base
 
@@ -48,6 +48,7 @@ async def init_models() -> None:
         None
     """
     engine = get_engine()
+    print(f"\n\n{'*'*50}\ninit_models() with engine: {engine}\n\n")
     async with engine.begin() as conn:
         # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)

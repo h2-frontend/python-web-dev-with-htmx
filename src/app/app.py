@@ -9,10 +9,10 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBearer
 from fastapi.staticfiles import StaticFiles
 
-from app.auth_router import auth_router
-from app.chat_router import chat_router
-from app.example_router import example_router
-from app.utils import templates
+from src.app.auth_router import auth_router
+from src.app.chat_router import chat_router
+from src.app.example_router import example_router
+from src.app.utils import templates
 
 security = HTTPBearer()
 

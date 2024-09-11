@@ -4,8 +4,8 @@ from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer
 from fastapi.templating import Jinja2Templates
 
-from app.db import AsyncSession, async_session, models
-from app.service import AppService
+from src.app.db import AsyncSession, async_session, models
+from src.app.service import AppService
 
 security = HTTPBearer()
 

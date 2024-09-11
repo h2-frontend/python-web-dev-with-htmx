@@ -3,10 +3,10 @@ from fastapi.responses import HTMLResponse
 from markdown import markdown
 from sse_starlette.sse import EventSourceResponse
 
-from app import schemas
-from app.db import models
-from app.service import AppService
-from app.utils import get_app_service, get_user, templates
+from src.app import schemas
+from src.app.db import models
+from src.app.service import AppService
+from src.app.utils import get_app_service, get_user, templates
 
 chat_router = APIRouter()
 
