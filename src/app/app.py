@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBearer
 from fastapi.staticfiles import StaticFiles
+import uvicorn
 
 from src.app.auth_router import auth_router
 from src.app.chat_router import chat_router
@@ -97,3 +98,6 @@ async def custom_404_handler(_: Any, __: Any) -> RedirectResponse:
         - RedirectResponse: The redirect response to the '/login' endpoint.
     """
     return RedirectResponse("/login")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
