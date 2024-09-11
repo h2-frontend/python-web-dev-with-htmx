@@ -172,6 +172,7 @@ async def add_message(
 )
 async def generate(
     chat_id: int,
+    request: Request,
     app_service: AppService = Depends(get_app_service),
     user: models.User = Depends(get_user),
 ) -> EventSourceResponse:
@@ -188,4 +189,4 @@ async def generate(
     Returns:
         EventSourceResponse: The server-sent events response.
     """
-    return EventSourceResponse(app_service.generate(chat_id))
+    return EventSourceResponse(app_service.generate(chat_id, request.app.state.chain))
