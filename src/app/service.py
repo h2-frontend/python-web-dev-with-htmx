@@ -11,7 +11,7 @@ from sqlalchemy.orm import selectinload
 from src.app import schemas
 from src.app.db import AsyncSession, models
 import logging
-#logging.basicConfig(filename='./log/messages.log', level=logging.INFO)
+logging.basicConfig(filename='./log/messages.log', level=logging.INFO)
 
 from src.app.rag.config import LANGSMITH_PROJECT
 from langchain.globals import set_debug, set_verbose
@@ -285,32 +285,20 @@ class AppService:
         for m in messages:
             logging.info(f"Message: {m}")
         logging.info('\n')
-
-        response = chain.astream(messages[-1]["content"])
-        #response = await litellm.acompletion(
-        #    model="gpt-3.5-turbo", messages=messages, stream=True
-        #)
-        temp = '''response = await litellm.acompletion(
-          model="gpt-3.5-turbo", #"Llama-3-KoEn-8B-Instruct-preview",
-          #  #messages=[{ "content": "은행에서 대출을 받으려면 어떻게 해야하죠?","role": "user"}],
-          messages=messages,
-          stream=True,
-          base_url="http://192.168.0.24:8080", 
-          custom_llm_provider="openai")'''
-
-        #logging.info(f"response: {response}")
-        #print(f'\nresponse:{response}')
-
+        response = chain.astream({"input":messages[-1]["content"]}, 
+                                 config={"configurable": {"session_id": str(chat_id)}})
         res = ""
+        valid_response = True
         async for chunk in response:
-            #content = chunk#.choices[0].delta.content
             print(f"\n\n{'*'*50}\ntype(chunk):{type(chunk)}\nchunk: {chunk}\n\n", flush=True)
-            content = chunk#['response']#.choices[0].delta.content
-            if content:
-                print(f"{'#'*20} content: {content} {'#'*20}", flush=True)
-                logging.info(f"{'#'*20} content: {content} {'#'*20}", flush=True)
-                #res += content
-                res += str(content)
+            if valid_response and chunk.get('answer'):
+                answer = chunk['answer']
+                #print(f"{'#'*20} answer: {answer} {'#'*20}", flush=True)
+                if answer.find('|')>=0:
+                    valid_response = False
+                    continue
+
+                res += answer
                 s = f"""
                 <div id="ai-sse" class="prose prose-sm w-full flex flex-col [&>*]:flex-grow">
                     {markdown(res, extensions=["fenced_code"])}

@@ -20,12 +20,12 @@ set_debug(True)
 set_verbose(True)
 
 from src.app.rag.config import CONFIG
-from src.app.rag.chain import build_chain
+from src.app.rag.chain import build_history_chain
 
 security = HTTPBearer()
 
 app = FastAPI()
-app.state.chain = build_chain(**CONFIG)
+app.state.chain = build_history_chain(**CONFIG)
 
 app.add_middleware(
     CORSMiddleware,
