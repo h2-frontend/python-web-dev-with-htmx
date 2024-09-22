@@ -42,8 +42,8 @@ def inject_embedding_to_dbpath(base, embedding):
 CONFIG = {
     'db_path': inject_embedding_to_dbpath(DB_BASE_PATH, DB_CONFIG['embedding']),
     'collection_name': 'HANJIN',
-    'prompt_template': SYSTEM_PROMPT_STR_EN,
-    'k': 5,
+    'prompt_str': SYSTEM_PROMPT_STR_EN,
+    'k': 2,
     'embedding': DB_CONFIG['embedding'],
     'model': GPT3_5_TURBO,
     'base_url': 'http://192.168.0.24:8080',
