@@ -20,7 +20,7 @@ set_debug(True)
 set_verbose(True)
 
 from src.app.rag.config import CONFIG
-from src.app.rag.chat import build_chain
+from src.app.rag.chain import build_chain
 
 security = HTTPBearer()
 
