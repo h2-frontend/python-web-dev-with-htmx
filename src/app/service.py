@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import AsyncGenerator, Any
+from collections import deque
 
 import bcrypt
-import litellm
 from fastapi import HTTPException
 from markdown import markdown
 from sqlalchemy import ScalarResult, func, select
@@ -17,6 +17,8 @@ from src.app.rag.config import LANGSMITH_PROJECT
 from langchain.globals import set_debug, set_verbose
 from langchain_teddynote import logging as log_langsmith
 log_langsmith.langsmith(LANGSMITH_PROJECT, set_enable=True)
+
+from src.app.rag.stream_parser import StreamParser
 
 set_debug(True)
 set_verbose(True)
@@ -289,16 +291,23 @@ class AppService:
                                  config={"configurable": {"session_id": str(chat_id)}})
         res = ""
         valid_response = True
+        stream_parser = StreamParser()
         async for chunk in response:
-            print(f"\n\n{'*'*50}\ntype(chunk):{type(chunk)}\nchunk: {chunk}\n\n", flush=True)
-            if valid_response and chunk.get('answer'):
-                answer = chunk['answer']
-                #print(f"{'#'*20} answer: {answer} {'#'*20}", flush=True)
-                if answer.find('|')>=0:
+            #print(f"\n\n{'*'*50}\ntype(chunk):{type(chunk)}\nchunk: {chunk}\n\n", flush=True)
+            if valid_response:
+                state, answer = stream_parser.parse_stream(chunk.get('answer'))
+                if state==stream_parser.END:
                     valid_response = False
+                    break 
+                elif state==stream_parser.TOOLING:
                     continue
-
-                res += answer
+                elif state==stream_parser.TOOLCALL:
+                    print(f"\n\n{'*'*50}\nToolcall: {answer}\n\n", flush=True)
+                    break
+                elif state==stream_parser.CONTROL:
+                    continue
+                elif state==stream_parser.START:
+                    res += answer
                 s = f"""
                 <div id="ai-sse" class="prose prose-sm w-full flex flex-col [&>*]:flex-grow">
                     {markdown(res, extensions=["fenced_code"])}
