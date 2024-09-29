@@ -292,28 +292,32 @@ class AppService:
         res = ""
         valid_response = True
         stream_parser = StreamParser()
-        async for chunk in response:
-            #print(f"\n\n{'*'*50}\ntype(chunk):{type(chunk)}\nchunk: {chunk}\n\n", flush=True)
-            if valid_response:
-                state, answer = stream_parser.parse_stream(chunk.get('answer'))
-                if state==stream_parser.END:
-                    valid_response = False
-                    break 
-                elif state==stream_parser.TOOLING:
-                    continue
-                elif state==stream_parser.TOOLCALL:
-                    print(f"\n\n{'*'*50}\nToolcall: {answer}\n\n", flush=True)
-                    break
-                elif state==stream_parser.CONTROL:
-                    continue
-                elif state==stream_parser.START:
-                    res += answer
-                s = f"""
-                <div id="ai-sse" class="prose prose-sm w-full flex flex-col [&>*]:flex-grow">
-                    {markdown(res, extensions=["fenced_code"])}
-                </div>
-                """
-                yield {"event": "message", "id": "id", "data": s}
+        try:
+            async for chunk in response:
+                #print(f"\n\n{'*'*50}\ntype(chunk):{type(chunk)}\nchunk: {chunk}\n\n", flush=True)
+                if valid_response:
+                    state, answer = stream_parser.parse_stream(chunk.get('answer'))
+                    if state==stream_parser.END:
+                        valid_response = False
+                        break 
+                    elif state==stream_parser.TOOLING:
+                        continue
+                    elif state==stream_parser.TOOLCALL:
+                        print(f"\n\n{'*'*50}\nToolcall: {answer}\n\n", flush=True)
+                        break
+                    elif state==stream_parser.CONTROL:
+                        continue
+                    elif state==stream_parser.START:
+                        res += answer
+                    s = f"""
+                    <div id="ai-sse" class="prose prose-sm w-full flex flex-col [&>*]:flex-grow">
+                        {markdown(res, extensions=["fenced_code"])}
+                    </div>
+                    """
+                    yield {"event": "message", "id": "id", "data": s}
+        except GeneratorExit:
+            print("GeneratorExit")
+
 
         async with self.session.begin():
             gen_message = models.ChatMessage(
