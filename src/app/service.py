@@ -1,12 +1,18 @@
 from dataclasses import dataclass
 from typing import AsyncGenerator, Any
 from collections import deque
+import json
 
 import bcrypt
+import requests
 from fastapi import HTTPException
 from markdown import markdown
 from sqlalchemy import ScalarResult, func, select
 from sqlalchemy.orm import selectinload
+
+from langchain.globals import set_debug, set_verbose
+from langchain_teddynote import logging as log_langsmith
+from langchain_core.messages.ai import AIMessage
 
 from src.app import schemas
 from src.app.db import AsyncSession, models
@@ -14,14 +20,52 @@ import logging
 logging.basicConfig(filename='./log/messages.log', level=logging.INFO)
 
 from src.app.rag.config import LANGSMITH_PROJECT
-from langchain.globals import set_debug, set_verbose
-from langchain_teddynote import logging as log_langsmith
+from src.app.rag.config import APIS
+from src.app.rag.config import VOC
+from src.app.rag.chain import print_history
+from src.app.rag.chain import insert_message_to_history
+
 log_langsmith.langsmith(LANGSMITH_PROJECT, set_enable=True)
 
 from src.app.rag.stream_parser import StreamParser
 
 set_debug(True)
 set_verbose(True)
+
+SUCCESS = 0
+INVALID_NUMBER = 1
+NOT_FOUND = 2
+
+def generate_output(d):
+    output = ''
+    for k, v in d.items():
+        output += f'* {VOC[k]}: {v}\n'
+
+    return output
+
+def call_api(tool, input):
+    response = requests.get(f'{APIS[tool]}{input}')
+    data = json.loads(response.text)
+    result = data.pop('result')
+    msg = ''
+    if result == SUCCESS:
+        if tool == 'track_package':
+            msg += f"배송 조회 결과를 알려드립니다.\n\n"
+        elif tool == 'find_reservation':
+            msg += f'예약 정보 조회 결과를 알려드립니다.\n\n'
+        elif tool == 'find_contact': 
+            msg += f'연락처 조회 결과를 알려드립니다.\n\n'
+        output = msg + generate_output(data)
+    else:
+        if tool == 'track_package_by_tracking_number':
+            msg += f"운송장번호 {input}에 대한 배송 정보를 찾을 수 없습니다. 운송장 번호를 확인하신 후 다시 조회해보세요.\n"
+        elif tool == 'find_reservation':
+            msg += f"예약번호 {input}에 대한 예약정보를 찾을 수 없습니다. 예약 번호를 확인하신 후 다시 조회해보세요.\n"
+        elif tool == 'find_contact': 
+            msg += f'알려주신 주소에 대한 집배점/배송사원 연락처를 찾을 수 없습니다. 주소를 확인하신 후 다시 조회해보세요.\n'
+        output = msg
+    print(f'\n\nREST API result: {result}\n\n')
+    return output
 
 @dataclass
 class AppService:
@@ -283,12 +327,19 @@ class AppService:
             else:
                 messages.append({"role": "assistant", "content": message.content})
 
-        logging.info('\n')
+        print('\n\nMessages')
         for m in messages:
-            logging.info(f"Message: {m}")
-        logging.info('\n')
+            print(f"Message: {m}", flush=True)
+        print('\n\n')
+        
+        print("\n\nPrint History before chain.astream")
+        print_history(str(chat_id))
         response = chain.astream({"input":messages[-1]["content"]}, 
                                  config={"configurable": {"session_id": str(chat_id)}})
+        print("\n\nPrint History after chain.astream")
+        print_history(str(chat_id))
+        print('\n\n')
+
         res = ""
         valid_response = True
         stream_parser = StreamParser()
@@ -299,12 +350,15 @@ class AppService:
                     state, answer = stream_parser.parse_stream(chunk.get('answer'))
                     if state==stream_parser.END:
                         valid_response = False
-                        break 
                     elif state==stream_parser.TOOLING:
                         continue
                     elif state==stream_parser.TOOLCALL:
                         print(f"\n\n{'*'*50}\nToolcall: {answer}\n\n", flush=True)
-                        break
+                        output = call_api(*answer)
+                        aim = AIMessage(content=output)
+                        insert_message_to_history(str(chat_id), aim)
+                        res += output
+                        valid_response = False
                     elif state==stream_parser.CONTROL:
                         continue
                     elif state==stream_parser.START:
