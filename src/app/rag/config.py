@@ -85,11 +85,11 @@ temp = '''    To track a shipment, you need to request the delivery tracking num
 
     '''
     
-    
-
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.25-tool_close'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug'
-DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml'
+#DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml'
+#DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml-nonewline'
+DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml_nonewline'
 
 DB_CONFIG = {
     'qa_path': './data/csv/qa_sorted_rev2_sorted.csv',
@@ -106,7 +106,7 @@ CONFIG = {
     'db_path': inject_embedding_to_dbpath(DB_BASE_PATH, DB_CONFIG['embedding']),
     'collection_name': 'HANJIN',
     'prompt_str': SYSTEM_PROMPT_STR_KO,
-    'k': 5,
+    'k': 1,
     'embedding': DB_CONFIG['embedding'],
     'model': GPT3_5_TURBO,
     'base_url': 'http://192.168.0.24:8080',
