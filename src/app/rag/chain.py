@@ -131,6 +131,55 @@ def build_history_chain(db_path, collection_name, prompt_str, k, embedding, mode
 
     return history_rag_chain
 
+def format_docs(docs):
+    for doc in docs:
+        print(f"{'='*5}{'='*5}")
+        print(doc.page_content)
+        print()
+    #return "\n\n".join(doc.page_content for doc in docs)
+    return "\n\n".join([d.page_content for d in docs])
+
+def build_history_chain_LECL(db_path, collection_name, prompt_str, k, embedding, model, base_url=None):
+    history_prompt = init_prompt(prompt_str, history=True)
+    chat_model = get_chat_model(model, base_url)
+
+    # This Runnable takes a dict with keys 'input' and 'context',
+    # formats them into a prompt, and generates a response.
+    rag_chain_from_docs = (
+        {   "input": lambda x: x["input"],  # input query
+            "history": lambda x: x["history"],  # chat history
+            "context": lambda x: format_docs(x["context"]),  # context
+        }
+        | history_prompt  # format query and context into prompt
+        | chat_model  # generate response
+        | StrOutputParser()  # coerce to string
+    )
+
+    retriever = get_retriever(db_path, collection_name, k, embedding)
+
+    # Pass input query to retriever
+    retrieve_docs = (lambda x: x["input"]) | retriever
+
+    # Below, we chain `.assign` calls. This takes a dict and successively
+    # adds keys-- "context" and "answer"-- where the value for each key
+    # is determined by a Runnable. The Runnable operates on all existing
+    # keys in the dict.
+    rag_chain = RunnablePassthrough.assign(context=retrieve_docs).assign(answer=rag_chain_from_docs)
+
+    # prompt must include a variable 'context'.
+    #history_chain = create_stuff_documents_chain(chat_model, history_prompt)
+    #rag_chain = create_retrieval_chain(retriever, history_chain)
+
+    history_rag_chain = RunnableWithMessageHistory(
+        rag_chain,
+        get_session_history,
+        input_messages_key="input",
+        history_messages_key="history",
+        output_messages_key="answer",
+    )
+
+    return history_rag_chain
+
 def main():
     print('Initializing...')
     chain = build_history_chain(**CONFIG)
