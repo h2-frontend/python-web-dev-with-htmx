@@ -16,6 +16,20 @@ SYSTEM_PROMPT_STR_KO = """당신은 한진택배의 온라인 고객 상담원�
     고객의 질문이 택배 서비스와 관련이 없을 때는 택배 서비스에 대한 질문만 답변할 수 있다고 친절하게 응답하세요.
     정확한 답변을 알 수 없을 때는 모른다고 하세요.
 
+    배송조회를 위해서는 운송장 번호를 고객에게 요청해야합니다.
+    운송장 번호는 10자리의 숫자입니다. 고객이 제공한 운송장 번호가 10자리 숫자가 아니면 정확한 운송장 번호를 입력하라고 요청하세요.
+    고객으로부터 형식에 맞는 운송장 번호를 받았을 경우, 다음 형식의 문구의 "tracking_number" 자리에 운송장 번호를 채워 넣어서 답변하세요(다른 문구를 덧붙이지 말고 아래의 형식으로만 답변하세요).
+    [Tool]track_package[/Tool] [Input]"tracking_number"[/Input]
+
+    예약조회를 위해서는 예약번호를 고객에게 요청해야합니다.
+    예약번호는 10자리의 숫자입니다. 고객이 제공한 예약번호가 10자리 숫자가 아니면 정확한 예약번호를 입력하라고 요청하세요.
+    고객으로부터 형식에 맞는 예약번호를 받았을 경우, 다음 형식의 문구의 "reservation_number" 자리에 예약번호를 채워 넣어서 답변하세요(다른 문구를 덧붙이지 말고 아래의 형식으로만 답변하세요).
+    [Tool]find_reservation[/Tool] [Input]"reservation_number"[/Input]
+
+    집배점 또는 배송사원의 연락처를 찾기 위해서는 배송지의 주소를 고객에게 요청해야합니다.
+    다음과 같은 형식의 문구에 고객으로부터 받은 주소를 채워 넣어서 답변하세요(다른 문구를 덧붙이지 말고 아래의 형식으로만 답변하세요).
+    [Tool]find_contact[/Tool] [Input]"address"[/Input]
+
     context: {context}
 
 
@@ -39,6 +53,20 @@ SYSTEM_PROMPT_STR_EN = """You are an online customer service representative for 
 
 
     """
+
+temp1 = '''
+    고객이 입력한 정보를 이용하여 검색을 하기 위해서는 아래의 3가지 Tool을 사용할 수 있습니다. 
+    오직 3가지 Tool 중 용도에 맞는 하나만 선택하여 사용할 수 있으니, 다른 Tool을 만들어서 사용하지 마세요.
+    같은 형식의 문구에 정보를 채워 넣어서 답변하세요(다른 문구를 덧붙이지 말고 아래의 형식으로만 답변하세요)
+
+    1. 배송조회: [Tool]track_package[/Tool] [Input]tracking_number[/Input]
+    2. 예약조회: [Tool]find_reservation[/Tool] [Input]reservation_number[/Input]
+    3. 주소로 집배점/배송사원 찾기: [Tool]find_contact[/Tool] [Input]address[/Input]
+
+    context: {context}
+
+'''
+
 temp = '''    To track a shipment, you need to request the delivery tracking number from the customer. 
     The tracking number is a 10-digit number. 
     If the tracking number provided by the customer is not a 10-digit number, ask them to enter the correct tracking number. 
@@ -60,10 +88,11 @@ temp = '''    To track a shipment, you need to request the delivery tracking num
     
 
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.25-tool_close'
-DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug'
+#DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug'
+DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml'
 
 DB_CONFIG = {
-    'qa_path': './data/csv/qa_sorted_rev1_rewritten.csv',
+    'qa_path': './data/csv/qa_sorted_rev2_sorted.csv',
     'links_path': './data/csv/links.txt',
     'actions_path': './data/csv/qa_actions.csv', # REST API endpoint
     'embedding': SOBERTA_EMBEDDING,
@@ -77,7 +106,7 @@ CONFIG = {
     'db_path': inject_embedding_to_dbpath(DB_BASE_PATH, DB_CONFIG['embedding']),
     'collection_name': 'HANJIN',
     'prompt_str': SYSTEM_PROMPT_STR_KO,
-    'k': 2,
+    'k': 5,
     'embedding': DB_CONFIG['embedding'],
     'model': GPT3_5_TURBO,
     'base_url': 'http://192.168.0.24:8080',
@@ -86,6 +115,7 @@ CONFIG = {
 APIS = {
     'track_package': "http://192.168.0.24:8003/track_package_by_tracking_number/",
     'find_reservation': "http://192.168.0.24:8003/find_reservation/",
+    'find_address': "http://192.168.0.24:8003/find_contact_by_address/",
 }
 
 VOC = {
@@ -99,4 +129,5 @@ VOC = {
     "delivered_to": "배달지",
     "office": "집배점",
     "staff": "배송직원",
+    "message": "조회 결과"
 }
