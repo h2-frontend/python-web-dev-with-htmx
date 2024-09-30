@@ -58,7 +58,8 @@ temp = '''    To track a shipment, you need to request the delivery tracking num
     
     
 
-DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.25-tool_close'
+#DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.25-tool_close'
+DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug'
 
 DB_CONFIG = {
     'qa_path': './data/csv/qa_sorted_rev1_rewritten.csv',
@@ -79,4 +80,22 @@ CONFIG = {
     'embedding': DB_CONFIG['embedding'],
     'model': GPT3_5_TURBO,
     'base_url': 'http://192.168.0.24:8080',
+}
+
+APIS = {
+    'track_package': "http://192.168.0.24:8003/track_package_by_tracking_number/",
+    'find_reservation': "http://192.168.0.24:8003/find_reservation/",
+}
+
+VOC = {
+    "tracking_number": "운송장 번호",
+    "reservation_number": "예약번호",
+    "status": "배송상태",
+    "r_status": "예약상태",
+    "content": "상품명",
+    "sender": "보내는 분",
+    "receiver": "받는 분",
+    "delivered_to": "배달지",
+    "office": "집배점",
+    "staff": "배송직원",
 }
