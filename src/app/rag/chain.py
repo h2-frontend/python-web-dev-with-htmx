@@ -33,10 +33,38 @@ from src.app.rag.util import (
 )
 
 g_history = {}
+def insert_message_to_history(session_id: str, message):
+    if session_id in g_history:
+        g_history[session_id].add_message(message)
+    else:
+        g_history[session_id] = InMemoryChatMessageHistory()
+        g_history[session_id].add_message(message)
+
 def get_session_history(session_id: str) -> BaseChatMessageHistory:
     if session_id not in g_history:
         g_history[session_id] = InMemoryChatMessageHistory()
     return g_history[session_id]
+
+def remove_special_tokens_from_str(s:str) -> str:
+    if s:
+        index = s.find('<|im_')
+        if index > -1:
+            s = s[:index]
+            if s and s[-1]=='|':
+                s = s[:-1]
+    return s.strip()
+
+def print_history(session_id: str):
+    if session_id in g_history:
+        print(f"\n\nSession ID:{session_id} History:")
+        for m in g_history[session_id].messages:
+            print(f"{m}\n")
+        for m in g_history[session_id].messages:
+            m.content = remove_special_tokens_from_str(m.content)
+        for m in g_history[session_id].messages:
+            print(f"{m}\n")
+    else:
+        print(f"\n\nSession ID:{session_id}: No history")
 
 def init_prompt(system_prompt_str, history):
     '''
@@ -59,7 +87,8 @@ def get_retriever(db_path, collection_name, k, embedding_model):
     db = Chroma( persist_directory=db_path,
                 collection_name=collection_name,
                 embedding_function=embedding_func)
-    return db.as_retriever(k=k)
+    #return db.as_retriever(k=k)
+    return db.as_retriever(search_kwargs={"k": k})
 
 def get_chat_model(model, base_url=None):
     if base_url:
@@ -101,12 +130,6 @@ def build_history_chain(db_path, collection_name, prompt_str, k, embedding, mode
     history_rag_chain = history_rag_chain
 
     return history_rag_chain
-
-def remove_special_tokens(s):
-    s = s[:s.find('<|im_')]
-    if s[-1]=='|':
-        s = s[:-1]
-    return s
 
 def main():
     print('Initializing...')
