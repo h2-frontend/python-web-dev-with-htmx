@@ -10,6 +10,7 @@ TAG_TOOL_BOOKING = '[Tool]find_reservation[Tool][Input]0123456789012[/Input]'
 # Regex for extracting the Tool and Input
 RE_TOOL = r'\s*(\[Tool\])\s*(\w+)\s*(\[/Tool\])\s*(\[Input\])\s*(\w+)\s*(\[/Input\])'
 
+
 class StreamParser:
     START = 0
     TOOLING = 1
@@ -28,7 +29,7 @@ class StreamParser:
         self.state = self.START
 
     def check_pass(self, s):
-        if not re.search(r'^[|<[]', s): # ^ means anchor to the start of the string
+        if not re.search(r'^[\|<[]', s): # ^ means anchor to the start of the string
             return True
         return False
 
@@ -81,7 +82,7 @@ class StreamParser:
                     return (self.state, '')
         elif self.state == self.CONTROL:
             self.s += s
-            if re.search(r'^\s*<|', s):
+            if re.search(r'^\s*<\|', s):
                 self.state = self.END
                 return (self.state, '')
             else:
