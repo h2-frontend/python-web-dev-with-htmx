@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import AsyncGenerator, Any
 from collections import deque
 import json
+import re
 
 import bcrypt
 import requests
@@ -363,6 +364,11 @@ class AppService:
                         continue
                     elif state==stream_parser.START:
                         res += answer
+                    
+                    #res = re.sub('hanjiin', 'hanjin', res)
+                    #print(f'\n{res}')
+                    res = res.replace('hanjiin', 'hanjin')
+                    #print(f'\n{res}\n')
                     s = f"""
                     <div id="ai-sse" class="prose prose-sm w-full flex flex-col [&>*]:flex-grow">
                         {markdown(res, extensions=["fenced_code"])}
