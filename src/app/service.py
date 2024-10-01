@@ -59,9 +59,11 @@ def call_api(tool, input):
         output = msg + generate_output(data)
     else:
         if tool == 'track_package':
-            msg += f"운송장번호 {input}에 대한 배송 정보를 찾을 수 없습니다. 운송장 번호를 확인하신 후 다시 조회해보세요.\n"
+            if input != 'tracking_number':
+                msg += f"운송장번호 {input}에 대한 배송 정보를 찾을 수 없습니다. 운송장 번호를 확인하신 후 다시 조회해보세요.\n"
         elif tool == 'find_reservation':
-            msg += f"예약번호 {input}에 대한 예약정보를 찾을 수 없습니다. 예약 번호를 확인하신 후 다시 조회해보세요.\n"
+            if input != 'reservation_number':
+                msg += f"예약번호 {input}에 대한 예약정보를 찾을 수 없습니다. 예약 번호를 확인하신 후 다시 조회해보세요.\n"
         elif tool == 'find_contact': 
             msg += f'알려주신 주소에 대한 집배점/배송사원 연락처를 찾을 수 없습니다. 주소를 확인하신 후 다시 조회해보세요.\n'
         output = msg
