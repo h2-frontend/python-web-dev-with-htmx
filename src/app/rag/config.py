@@ -20,7 +20,6 @@ SYSTEM_PROMPT_STR_KO = """당신은 한진택배의 온라인 고객 상담원�
     [Tool]track_package[/Tool] [Input]tracking_number[/Input]
 
 
-
     context: {context}
 
 
