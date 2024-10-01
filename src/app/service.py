@@ -58,7 +58,7 @@ def call_api(tool, input):
             msg += f'연락처 조회 결과를 알려드립니다.\n\n'
         output = msg + generate_output(data)
     else:
-        if tool == 'track_package_by_tracking_number':
+        if tool == 'track_package':
             msg += f"운송장번호 {input}에 대한 배송 정보를 찾을 수 없습니다. 운송장 번호를 확인하신 후 다시 조회해보세요.\n"
         elif tool == 'find_reservation':
             msg += f"예약번호 {input}에 대한 예약정보를 찾을 수 없습니다. 예약 번호를 확인하신 후 다시 조회해보세요.\n"
