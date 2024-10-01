@@ -40,10 +40,12 @@ class StreamParser:
 
     def parse_toolcall(self, s):
         m = re.search(RE_TOOL, s)
-        g = m.groups()
-        if len(g) != 6:
-            return None
-        return (g[1], g[4])
+        if m:
+            g = m.groups()
+            if len(g) != 6:
+                return None
+            return (g[1], g[4])
+        return None
 
     def parse_stream(self, s):
         if not s:
