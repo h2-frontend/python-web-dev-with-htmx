@@ -111,6 +111,7 @@ CONFIG = {
     'collection_name': 'HANJIN',
     'prompt_str': SYSTEM_PROMPT_STR_KO,
     'k': 1,
+    'score': 0.9,
     'embedding': DB_CONFIG['embedding'],
     'model': GPT3_5_TURBO,
     'base_url': 'http://192.168.0.24:8080',

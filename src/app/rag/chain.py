@@ -90,6 +90,13 @@ def get_retriever(db_path, collection_name, k, embedding_model):
     #return db.as_retriever(k=k)
     return db.as_retriever(search_kwargs={"k": k})
 
+def get_retriever_with_score(db_path, collection_name, score, embedding_model):
+    embedding_func = init_embedding_func(embedding_model)
+    db = Chroma( persist_directory=db_path,
+                collection_name=collection_name,
+                embedding_function=embedding_func)
+    return db.as_retriever( search_type="similarity_score_threshold", search_kwargs={'score_threshold': score})
+
 def get_chat_model(model, base_url=None):
     if base_url:
         return ChatOpenAI(model=model, temperature=0, base_url=base_url)
@@ -112,9 +119,10 @@ def build_chain(db_path, collection_name, prompt_template, k, embedding, model, 
     )
     return chain
     
-def build_history_chain(db_path, collection_name, prompt_str, k, embedding, model, base_url=None):
+def build_history_chain(db_path, collection_name, prompt_str, k, score, embedding, model, base_url=None):
     history_prompt = init_prompt(prompt_str, history=True)
-    retriever = get_retriever(db_path, collection_name, k, embedding)
+    #retriever = get_retriever(db_path, collection_name, k, embedding)
+    retriever = get_retriever_with_score(db_path, collection_name, score, embedding)
     chat_model = get_chat_model(model, base_url)
     # prompt must include a variable 'context'.
     history_chain = create_stuff_documents_chain(chat_model, history_prompt)
@@ -139,7 +147,7 @@ def format_docs(docs):
     #return "\n\n".join(doc.page_content for doc in docs)
     return "\n\n".join([d.page_content for d in docs])
 
-def build_history_chain_LECL(db_path, collection_name, prompt_str, k, embedding, model, base_url=None):
+def build_history_chain_LECL(db_path, collection_name, prompt_str, k, score, embedding, model, base_url=None):
     history_prompt = init_prompt(prompt_str, history=True)
     chat_model = get_chat_model(model, base_url)
 
