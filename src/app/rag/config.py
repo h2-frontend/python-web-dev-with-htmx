@@ -24,6 +24,7 @@ SYSTEM_PROMPT_STR_KO = """당신은 한진택배의 온라인 고객 상담원�
 
 
     """
+
 temp = '''
     예약조회를 위해서는 예약번호를 고객에게 요청해야합니다.
     예약번호는 10자리의 숫자입니다.
@@ -39,6 +40,7 @@ temp = '''
 
     [Tool]find_contact[/Tool] [Input]"address"[/Input]
 '''    
+
 SYSTEM_PROMPT_STR_EN = """You are an online customer service representative for Hanjin Express. 
     Your job is to kindly respond to customer inquiries about Hanjin Express’s delivery services via text messenger. 
     Please answer based on the information provided in the context below. 
@@ -46,9 +48,10 @@ SYSTEM_PROMPT_STR_EN = """You are an online customer service representative for 
     If the customer's question is not related to the provided context, politely respond that you only answer queries related to the delivery service.
     If you do not know the exact answer, say that you do not know.
 
-    배송조회를 위해서는 10자리의 숫자로 구성된 택배 운송장 번호를 고객에게 요청해야합니다.
-    고객이 제공한 운송장 번호가 10자리 숫자가 아니면 정확한 운송장 번호를 입력하라고 요청하세요.
-    배송 조회를 하기 위해서는 다음과 같은 형식의 문구에 운송장 번호를 채워 넣어서 답변하세요(다른 문구를 덧붙이지 말고 아래의 형식으로만 답변하세요).
+    To track a shipment, you need to request the delivery tracking number from the customer. 
+    The tracking number is a 10-digit number. 
+    If the tracking number provided by the customer is not a 10-digit number, ask them to enter the correct tracking number. 
+    Only when you have already received a tracking number in the correct format from the customer, then respond by filling in the tracking number in the following format (do not add any other phrases, respond only in the format below).
 
     [Tool]track_package
     [Tool Input]"tracking_number"
@@ -71,29 +74,22 @@ temp1 = '''
 
 '''
 
-temp = '''    To track a shipment, you need to request the delivery tracking number from the customer. 
-    The tracking number is a 10-digit number. 
-    If the tracking number provided by the customer is not a 10-digit number, ask them to enter the correct tracking number. 
-    Only when you have already received a tracking number in the correct format from the customer, then respond by filling in the tracking number in the following format (do not add any other phrases, respond only in the format below).
-
-    <Tool>track_package</Tool>
-    <Tool_Input>"tracking_number"</Tool_Input>
-
+temp = '''
     배송조회를 위해서는 10자리의 숫자로 구성된 택배 운송장 번호를 고객에게 요청해야합니다.
     고객이 제공한 운송장 번호가 10자리 숫자가 아니면 정확한 운송장 번호를 입력하라고 요청하세요.
     고객으로부터 운송장 번호를 제공 받은 후, 배송 조회를 하려면 다음과 같은 형식의 문구에 운송장 번호를 채워 넣어서 답변하세요(다른 문구를 덧붙이지 말고 아래의 형식으로만 답변하세요).
 
     <Tool>track_package</Tool>
     <Tool_Input>"tracking_number"</Tool_Input>
-    
-
     '''
     
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.25-tool_close'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml-nonewline'
-DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml_nonewline'
+#DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml_nonewline'
+#DB_BASE_PATH = './.volumes/db/rev.25-qa_expanded-reformed-id_ko-sroberta-multitask_20241022-20-4'
+DB_BASE_PATH = './.volumes/db/rev.25-qa_expanded-reformed-id_ko-sroberta-multitask_20241022-25-1'
 
 DB_CONFIG = {
     'qa_path': './data/csv/qa_sorted_rev2_sorted.csv',
@@ -107,11 +103,12 @@ def inject_embedding_to_dbpath(base, embedding):
     return '_'.join(base.split('-')[:-1] + [embedding.replace('/', '-')] + base.split('-')[-1:])
 
 CONFIG = {
-    'db_path': inject_embedding_to_dbpath(DB_BASE_PATH, DB_CONFIG['embedding']),
+    #'db_path': inject_embedding_to_dbpath(DB_BASE_PATH, DB_CONFIG['embedding']),
+    'db_path': DB_BASE_PATH,
     'collection_name': 'HANJIN',
     'prompt_str': SYSTEM_PROMPT_STR_KO,
     'k': 1,
-    'score': 0.9,
+    'score': 0.4,
     'embedding': DB_CONFIG['embedding'],
     'model': GPT3_5_TURBO,
     'base_url': 'http://192.168.0.24:8080',

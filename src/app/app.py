@@ -26,8 +26,8 @@ from src.app.rag.chain import build_history_chain_LECL
 security = HTTPBearer()
 
 app = FastAPI()
-app.state.chain = build_history_chain(**CONFIG)
-#app.state.chain = build_history_chain_LECL(**CONFIG)
+#app.state.chain = build_history_chain(**CONFIG)
+app.state.chain = build_history_chain_LECL(**CONFIG)
 
 app.add_middleware(
     CORSMiddleware,

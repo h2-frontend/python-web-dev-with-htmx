@@ -118,7 +118,7 @@ def build_chain(db_path, collection_name, prompt_template, k, embedding, model, 
         | StrOutputParser()
     )
     return chain
-    
+
 def build_history_chain(db_path, collection_name, prompt_str, k, score, embedding, model, base_url=None):
     history_prompt = init_prompt(prompt_str, history=True)
     #retriever = get_retriever(db_path, collection_name, k, embedding)
@@ -145,7 +145,8 @@ def format_docs(docs):
         print(doc.page_content)
         print()
     #return "\n\n".join(doc.page_content for doc in docs)
-    return "\n\n".join([d.page_content for d in docs])
+    #return "\n\n".join([d.page_content for d in docs])
+    return "\n\n".join([d.metadata['answer'] for d in docs])
 
 def build_history_chain_LECL(db_path, collection_name, prompt_str, k, score, embedding, model, base_url=None):
     history_prompt = init_prompt(prompt_str, history=True)
