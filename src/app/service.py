@@ -351,7 +351,6 @@ class AppService:
         stream_parser = StreamParser()
         try:
             async for chunk in response:
-                #print(f"\n\n{'*'*50}\ntype(chunk):{type(chunk)}\nchunk: {chunk}\n\n", flush=True)
                 if valid_response:
                     state, answer = stream_parser.parse_stream(chunk.get('answer'))
                     if state==stream_parser.END:
@@ -365,15 +364,10 @@ class AppService:
                         insert_message_to_history(str(chat_id), aim)
                         res += output
                         valid_response = False
-                    #elif state==stream_parser.CONTROL:
-                    #    continue
                     elif state==stream_parser.START:
                         res += answer
                     
-                    #res = re.sub('hanjiin', 'hanjin', res)
-                    #print(f'\n{res}')
                     res = res.replace('hanjiin', 'hanjin')
-                    #print(f'\n{res}\n')
                     s = f"""
                     <div id="ai-sse" class="prose prose-sm w-full flex flex-col [&>*]:flex-grow">
                         {markdown(res, extensions=["fenced_code"])}
