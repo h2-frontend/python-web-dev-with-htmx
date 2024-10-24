@@ -47,16 +47,14 @@ SYSTEM_PROMPT_STR_EN = """You are an online customer service representative for 
 
     """
 
-CHAIN_TYPE_CONTEXT = 'CONTEXT' 
-CHAIN_TYPE_TOOL = 'TOOL'
-    
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.25-tool_close'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml-nonewline'
 #DB_BASE_PATH = './.volumes/db/hanjin-chroma-2024.9.30-debug-rev2-q5-nohtml_nonewline'
 #DB_BASE_PATH = './.volumes/db/rev.25-qa_expanded-reformed-id_ko-sroberta-multitask_20241022-20-4'
-DB_BASE_PATH = './.volumes/db/rev.25-qa_expanded-reformed-id_ko-sroberta-multitask_20241022-25-1'
+#DB_BASE_PATH = './db/rev.25-qa_expanded-reformed-id_ko-sroberta-multitask_20241022-25-1'
+DB_BASE_PATH = './db/rev.26-qa_expanded-reformed-id_ko-sroberta-multitask_20241024-26-1'
 
 DB_CONFIG = {
     'qa_path': './data/csv/qa_sorted_rev2_sorted.csv',
@@ -75,7 +73,7 @@ CONFIG = {
     'collection_name': 'HANJIN',
     'prompt_str': SYSTEM_PROMPT_STR_KO+dynamic_prompt,
     'k': 1,
-    'score': 0.4,
+    'score': 0.7,
     'embedding': DB_CONFIG['embedding'],
     'model': GPT3_5_TURBO,
     'base_url': LLM_LOCAL

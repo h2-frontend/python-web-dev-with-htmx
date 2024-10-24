@@ -59,10 +59,6 @@ class StreamParser:
                     self.state = self.TOOLING
                     self.s += s.strip()
                     return (self.state, '')
-#                elif re.search(r'^\s*<', s):
-#                    self.state = self.CONTROL
-#                    self.s += s
-#                    return (self.state, '')
                 else:
                     self.state = self.END
                     return (self.state, '')
@@ -83,14 +79,30 @@ class StreamParser:
                     return (self.TOOLCALL, m)
                 else:
                     return (self.state, '')
-#        elif self.state == self.CONTROL:
-#            self.s += s
-#            if re.search(r'^\s*<\|', s):
-#                self.state = self.END
-#                return (self.state, '')
-#            else:
-#                temp = self.s
-#                self.reset()
-#                return (self.state, temp)
         else:
             return (self.state, '')
+
+if __name__ == '__main__':
+    stream_parser = StreamParser()
+    s2 = "안녕하세요! 한진택배의 온라인 고객 상담원입니다. 택배 서비스에 관한 질문에 도움을 드리겠습니다. 다만 택배 서비스와 관련 없는 질문은 답변드릴 수 없다는 점을 이해해 주세요.\n\n운송장 번호를 제공해 주시면 배송 상태를 확인해 드리겠습니다. 운송장 번호를 알려주시면, 다음 형식을 사용하여 답변을 드리겠습니다:\n\n[Tool]track_package[/Tool] [Input]tracking_number[/Input]\n\n운송장 번호를 알려주시면 최선을 다해 도와드리겠습니다."
+    s = "안녕하세요! 관련 없는 질문은 답변드릴 수 없다는 점을 이해해 주세요.\n\n운송장 번호를 알려주시면, 다음 형식을 사용하여 답변을 드리겠습니다:\n\n[Tool]track_package[/Tool] [Input]tracking_number[/Input]\n\n운송장 번호를 알려주시면 최선을 다해 도와드리겠습니다."
+
+    res = ''
+    valid_response = True
+    for c in s:
+        if valid_response:
+            state, answer = stream_parser.parse_stream(c)
+            if state==stream_parser.END:
+                valid_response = False
+            elif state==stream_parser.TOOLING:
+                continue
+            elif state==stream_parser.TOOLCALL:
+                print(f"\n\n{'*'*50}\nToolcall: {answer}\n\n", flush=True)
+                #output = call_api(*answer)
+                res += f"Toolcall: {answer}\n"
+                valid_response = False
+            #elif state==stream_parser.CONTROL:
+            #    continue
+            elif state==stream_parser.START:
+                res += answer
+            print(f'\n=======\n{res}')
