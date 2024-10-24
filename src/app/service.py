@@ -29,6 +29,7 @@ from src.app.rag.chain import insert_message_to_history
 log_langsmith.langsmith(LANGSMITH_PROJECT, set_enable=True)
 
 from src.app.rag.stream_parser import StreamParser
+from src.app.rag.chain import rebuild_chain
 
 set_debug(True)
 set_verbose(True)
@@ -297,7 +298,7 @@ class AppService:
             self.session.add(message)
         return message
 
-    async def generate(self, chat_id: int, chain: Any) -> AsyncGenerator[dict, None]:
+    async def generate(self, chat_id: int, chain: Any, retriever: Any) -> AsyncGenerator[dict, None]:
         """
         Generate a response for a chat.
 
@@ -335,6 +336,8 @@ class AppService:
             print(f"Message: {m}", flush=True)
         print('\n\n')
         
+        chain = rebuild_chain(messages[-1]["content"], retriever, chain)
+
         print("\n\nPrint History before chain.astream")
         print_history(str(chat_id))
         response = chain.astream({"input":messages[-1]["content"]}, 
@@ -362,8 +365,8 @@ class AppService:
                         insert_message_to_history(str(chat_id), aim)
                         res += output
                         valid_response = False
-                    elif state==stream_parser.CONTROL:
-                        continue
+                    #elif state==stream_parser.CONTROL:
+                    #    continue
                     elif state==stream_parser.START:
                         res += answer
                     

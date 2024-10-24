@@ -189,4 +189,4 @@ async def generate(
     Returns:
         EventSourceResponse: The server-sent events response.
     """
-    return EventSourceResponse(app_service.generate(chat_id, request.app.state.chain))
+    return EventSourceResponse(app_service.generate(chat_id, request.app.state.chain, request.app.state.retriever))

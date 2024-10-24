@@ -27,7 +27,7 @@ security = HTTPBearer()
 
 app = FastAPI()
 #app.state.chain = build_history_chain(**CONFIG)
-app.state.chain = build_history_chain_LECL(**CONFIG)
+app.state.chain, app.state.retriever, app.state.chain_type = build_history_chain_LECL(**CONFIG)
 
 app.add_middleware(
     CORSMiddleware,
