@@ -29,7 +29,8 @@ class StreamParser:
         self.state = self.START
 
     def check_pass(self, s):
-        if not re.search(r'^[\|<[]', s): # ^ means anchor to the start of the string
+        #if not re.search(r'^[\|<[]', s): # ^ means anchor to the start of the string
+        if not re.search(r'^[[]', s): # ^ means anchor to the start of the string
             return True
         return False
 
@@ -58,10 +59,10 @@ class StreamParser:
                     self.state = self.TOOLING
                     self.s += s.strip()
                     return (self.state, '')
-                elif re.search(r'^\s*<', s):
-                    self.state = self.CONTROL
-                    self.s += s
-                    return (self.state, '')
+#                elif re.search(r'^\s*<', s):
+#                    self.state = self.CONTROL
+#                    self.s += s
+#                    return (self.state, '')
                 else:
                     self.state = self.END
                     return (self.state, '')
@@ -82,14 +83,14 @@ class StreamParser:
                     return (self.TOOLCALL, m)
                 else:
                     return (self.state, '')
-        elif self.state == self.CONTROL:
-            self.s += s
-            if re.search(r'^\s*<\|', s):
-                self.state = self.END
-                return (self.state, '')
-            else:
-                temp = self.s
-                self.reset()
-                return (self.state, temp)
+#        elif self.state == self.CONTROL:
+#            self.s += s
+#            if re.search(r'^\s*<\|', s):
+#                self.state = self.END
+#                return (self.state, '')
+#            else:
+#                temp = self.s
+#                self.reset()
+#                return (self.state, temp)
         else:
             return (self.state, '')
